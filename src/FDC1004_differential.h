@@ -46,16 +46,17 @@ Student at NTNU, Norway
 	*******************************************************************************************/
 	class FDC1004 {
 	public:
-		FDC1004(uint16_t rate = FDC1004_100HZ);
+		FDC1004(uint8_t rate = FDC1004_100HZ);
 		uint16_t read16(uint8_t reg);
 		void write16(uint8_t reg, uint16_t data);
 		uint8_t configureMeasurement(uint8_t measurement, uint8_t channel_1, uint8_t channel_2);
-		uint8_t triggerSingleMeasurement(uint8_t measurement, uint8_t rate);
+		uint8_t triggerSingleMeasurement(uint8_t measurement);
 		uint8_t readMeasurement(uint8_t measurement, uint16_t value[]);
-		uint8_t measureChannel(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, uint8_t rate, uint16_t * value);
-		double getCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, uint8_t rate);
-		uint8_t getRawCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, uint8_t rate, int32_t * value);
-		double measureLevel(double base_cap, double prefactor, uint8_t rate);
+		uint8_t measureChannel(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, uint16_t * value);
+		double getCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2);
+		uint8_t getRawCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, int32_t * value);
+		double measureLevel(double prefactor);
+		void setBaseCapacitance();
 
 	private:
 		double value;

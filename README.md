@@ -1,6 +1,6 @@
 # FDC1004_differential
 
-This library provides functionality for differential measurement with the FDC1004 Capacitance to Digital Sensor.
+This library provides functionality for differential measurement with the FDC1004 Capacitance to Digital Sensor. Based on library by Benjamin Shaya.
 Designed for use with the Capacitive-Based Liquid Level Sensing Sensor Reference Design from Texas Instruments found at http://www.ti.com/tool/tida-00317
 
 ## Requirements

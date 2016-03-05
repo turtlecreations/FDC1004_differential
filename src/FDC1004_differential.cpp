@@ -15,7 +15,7 @@ uint8_t MEAS_MSB[] = { 0x00, 0x02, 0x04, 0x06 };
 uint8_t MEAS_LSB[] = { 0x01, 0x03, 0x05, 0x07 };
 uint8_t SAMPLE_DELAY[] = { 11, 11, 6, 3 };
 
-FDC1004::FDC1004(uint16_t rate) {
+FDC1004::FDC1004(uint8_t rate) {
 	this->_rate = rate;
 }
 
@@ -58,14 +58,14 @@ uint8_t FDC1004::configureMeasurement(uint8_t measurement, uint8_t channel_1, ui
 	return 0;
 }
 
-uint8_t FDC1004::triggerSingleMeasurement(uint8_t measurement, uint8_t rate) {
+uint8_t FDC1004::triggerSingleMeasurement(uint8_t measurement) {
 	//verify data
-	if (!FDC1004_IS_MEAS(measurement) || !FDC1004_IS_RATE(rate)) {
+	if (!FDC1004_IS_MEAS(measurement) || !FDC1004_IS_RATE(_rate)) {
 		Serial.println("bad trigger request");
 		return 1;
 	}
 	uint16_t trigger_data;
-	trigger_data = ((uint16_t)rate) << 10; // sample rate
+	trigger_data = ((uint16_t)_rate) << 10; // sample rate
 	trigger_data |= 0 << 8; //repeat disabled
 	trigger_data |= (1 << (7 - measurement)); // 0 > bit 7, 1 > bit 6, etc
 	write16(FDC_REGISTER, trigger_data);
@@ -93,26 +93,26 @@ uint8_t FDC1004::readMeasurement(uint8_t measurement, uint16_t value[]) {
 	return 0;
 }
 
-uint8_t FDC1004::measureChannel(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, uint8_t rate, uint16_t * value) {
+uint8_t FDC1004::measureChannel(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, uint16_t * value) {
 	if (configureMeasurement(measurement, channel_1, channel_2)) return 1;
-	if (triggerSingleMeasurement(measurement, rate)) return 1;
-	delay(SAMPLE_DELAY[rate]);
+	if (triggerSingleMeasurement(measurement)) return 1;
+	delay(SAMPLE_DELAY[_rate]);
 	return readMeasurement(measurement, value);
 }
 
-double FDC1004::getCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, uint8_t rate) {
+double FDC1004::getCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2) {
 	int32_t value;
-	uint8_t result = getRawCapacitance(measurement, channel_1, channel_2, rate, &value);
+	uint8_t result = getRawCapacitance(measurement, channel_1, channel_2, &value);
 	if (result) return 0x80000000;
 
 	return (double)value / PICOFARAD_CONVERSION_CONSTANT; //picofarads
 }
 
-uint8_t FDC1004::getRawCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, uint8_t rate, int32_t * value) {
+uint8_t FDC1004::getRawCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, int32_t * value) {
 	if (!FDC1004_IS_CHANNEL(channel_1) || !FDC1004_IS_CHANNEL(channel_1) || (channel_1 == channel_2)) return 1;
 	uint16_t raw_value[2];
 
-	if (measureChannel(measurement, channel_1, channel_2, rate, raw_value)) {
+	if (measureChannel(measurement, channel_1, channel_2, raw_value)) {
 		Serial.println("error");
 		return 1;
 	}
@@ -122,7 +122,7 @@ uint8_t FDC1004::getRawCapacitance(uint8_t measurement, uint8_t channel_1, uint8
 	return 0;
 }
 
-double FDC1004::measureLevel(double base_cap, double prefactor, uint8_t rate) {
+double FDC1004::measureLevel(double prefactor) {
 	/*
 	MEAS1 = CIN1(CHA) - CIN4(CHB) //Level sensor
 	MEAS2 = CIN2(CHA) - CIN4(CHB) //Reference Environment sensor
@@ -131,9 +131,13 @@ double FDC1004::measureLevel(double base_cap, double prefactor, uint8_t rate) {
 	level = h_RL * (C_level - C_level(0)) / (C_RL - C_RE)
 	*/
 
-	double c_level = getCapacitance(FDC1004_MEAS1, FDC1004_CIN1, FDC1004_CIN4, rate);
-	double c_rl = getCapacitance(FDC1004_MEAS2, FDC1004_CIN2, FDC1004_CIN4, rate);
-	double c_re = getCapacitance(FDC1004_MEAS3, FDC1004_CIN3, FDC1004_CIN4, rate);
+	double c_level = getCapacitance(FDC1004_MEAS1, FDC1004_CIN1, FDC1004_CIN4);
+	double c_rl = getCapacitance(FDC1004_MEAS2, FDC1004_CIN2, FDC1004_CIN4);
+	double c_re = getCapacitance(FDC1004_MEAS3, FDC1004_CIN3, FDC1004_CIN4);
 
-	return prefactor * ((c_level - base_cap) / (c_rl - c_re) * -1);
+	return prefactor * ((c_level - _base_cap) / (c_rl - c_re) * -1);
+}
+
+void FDC1004::setBaseCapacitance() {
+	_base_cap = getCapacitance(FDC1004_MEAS1, FDC1004_CIN1, FDC1004_CIN4);
 }
