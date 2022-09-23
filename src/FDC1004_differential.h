@@ -49,7 +49,7 @@ Student at NTNU, Norway
 		FDC1004(uint8_t rate = FDC1004_100HZ);
 		uint16_t read16(uint8_t reg);
 		void write16(uint8_t reg, uint16_t data);
-		bool is_FDC1004();
+		bool is_FDC1004(); // Check whether device is functional and accessible (well soldered)
 		uint8_t configureMeasurement(uint8_t measurement, uint8_t channel_1, uint8_t channel_2);
 		uint8_t triggerSingleMeasurement(uint8_t measurement);
 		uint8_t readMeasurement(uint8_t measurement, uint16_t value[]);
@@ -58,6 +58,7 @@ Student at NTNU, Norway
 		uint8_t getRawCapacitance(uint8_t measurement, uint8_t channel_1, uint8_t channel_2, int32_t * value);
 		double measureLevel(double prefactor);
 		void setBaseCapacitance();
+		bool is_present;
 
 	private:
 		double value;

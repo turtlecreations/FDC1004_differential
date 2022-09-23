@@ -57,8 +57,7 @@ bool FDC1004::is_FDC1004() {
     result = true; 
   } else {
     this->is_present = false; 
-    debugPrintln("No FDC1004 found. 0xFF device ID register reads: " + String(deviceID, 16)); // base 16 to print in hex
-    // Serial.println("SCL pin is: " + String(this->I2CBus.getScl()) + " SDA pin is: " + String(this->I2CBus.getSda())); 
+    Serial.println("No FDC1004 found. 0xFF device ID register reads: " + String(deviceID, 16)); // base 16 to print in hex
   }
   
   return result; 
