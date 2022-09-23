@@ -4,7 +4,7 @@ This is a library for differential measurement with the FDC1004 Capacitive Senso
 Created for use with the Capacitive-Based Liquid Level Sensing Sensor Reference Design:
 http://www.ti.com/lit/pdf/tidu736
 
-Written by Andreas Østensen
+Written by Andreas ï¿½stensen
 Student at NTNU, Norway
 ************************/
 
@@ -49,6 +49,7 @@ Student at NTNU, Norway
 		FDC1004(uint8_t rate = FDC1004_100HZ);
 		uint16_t read16(uint8_t reg);
 		void write16(uint8_t reg, uint16_t data);
+		bool is_FDC1004();
 		uint8_t configureMeasurement(uint8_t measurement, uint8_t channel_1, uint8_t channel_2);
 		uint8_t triggerSingleMeasurement(uint8_t measurement);
 		uint8_t readMeasurement(uint8_t measurement, uint16_t value[]);

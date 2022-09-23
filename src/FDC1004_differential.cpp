@@ -3,7 +3,7 @@ FDC1004_differential Library
 
 This library provides functions for using TI's FDC1004 Capacitance to Digital Sensor in differential measurement
 
-Written by Andreas Østensen
+Written by Andreas ï¿½stensen
 NTNU, Norway
 
 ************************************************************************/
@@ -41,6 +41,28 @@ void FDC1004::write16(uint8_t reg, uint16_t data) {
 	Wire.write((uint8_t)(data >> 8));
 	Wire.write((uint8_t)data);
 	Wire.endTransmission();
+}
+
+// Checks whether an FDC1004 is connected to this bus. 
+bool FDC1004::is_FDC1004() {
+  // Read out register 0xFF 
+  // Should read 0x1004 
+  // This confirms device is OK, powered and correctly configured I2C
+
+  bool result = false; 
+  uint16_t deviceID = read16((uint8_t)0xFF); //try to read device ID from FDC1004 device
+
+  if (deviceID == 0x1004) {
+    this->is_present = true; 
+    result = true; 
+  } else {
+    this->is_present = false; 
+    debugPrintln("No FDC1004 found. 0xFF device ID register reads: " + String(deviceID, 16)); // base 16 to print in hex
+    // Serial.println("SCL pin is: " + String(this->I2CBus.getScl()) + " SDA pin is: " + String(this->I2CBus.getSda())); 
+  }
+  
+  return result; 
+
 }
 
 uint8_t FDC1004::configureMeasurement(uint8_t measurement, uint8_t channel_1, uint8_t channel_2) {
